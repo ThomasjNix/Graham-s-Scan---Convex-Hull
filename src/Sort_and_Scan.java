@@ -3,8 +3,9 @@ import java.util.*;
 public class Sort_and_Scan {
 	
 	Point[] pointArray;
+	Point[] sortedPointArray;
 	Point leastXPoint;
-	Stack sortedPoints = new Stack();
+
 	
 	public Sort_and_Scan(Point[] arrayOfPoints){
 		pointArray=arrayOfPoints;
@@ -37,49 +38,24 @@ public class Sort_and_Scan {
 	
 	public void findPolarAngle(){
 		for (int i = 0; i < pointArray.length; i++){
-			pointArray[i].polarAngleToOrigin=Math.toDegrees(Math.atan(pointArray[i].xPos/pointArray[i].yPos));
+			pointArray[i].polarAngleToOrigin=Math.toDegrees(Math.atan(pointArray[i].yPos/pointArray[i].xPos));
 			
 		}
 	}
 	
-	public int compareTo(Point thisPoint, Point thatPoint){
-		int result=0;
-		
-		//-1 means counter-clockwise
-		//1 means clockwise
-		//0 means parallel
-		if (thisPoint.xPos*thatPoint.yPos > thisPoint.yPos*thatPoint.xPos){
-			result=-1;
-		}else if (thisPoint.xPos*thatPoint.yPos < thisPoint.yPos*thatPoint.xPos){
-			result=1;
-		}else{
-			result=0;
-		}
-		return result;
-	}	
+
 	
 	public void sortPoints(){
-		
-		/*NOTE:::
-		 * create a temporary hashmap for the calculations
-		 * Then you can reference the points by the sorted array of points
-		 * ex:
-		 * sorted array goes 3,6,4,8...
-		 * If you use a temporary hashmap, you can call
-		 * hashmap.get(sortedarray[0]) to get the value of the first point
-		 * 
-		 * Also then you can recreate the pointArray in sorted order
-		 */
 		Point[] tempArray = new Point[pointArray.length];
 		tempArray = pointArray;
 		
 		HashMap<Integer, Double> aHashMap = new HashMap<>();
+		
 		for (int i = 0; i < pointArray.length; i++){
 			if (!Double.isNaN(pointArray[i].polarAngleToOrigin)){			
 			aHashMap.put(pointArray[i].pointNumber, pointArray[i].polarAngleToOrigin);
 			}
 		}
-
 		
 		int[] sortedPointNums = new int[pointArray.length-1];
 		int arrayCounter = 0;
@@ -99,15 +75,67 @@ public class Sort_and_Scan {
 			whileLoopCounter++;
 		}
 		
-		System.out.println("\n\nSorted points: \n");
-		for (int i = 0; i < sortedPointNums.length; i++){
-		System.out.println("Point " + sortedPointNums[i]);
+		
+		sortedPointArray=new Point[pointArray.length-1];
+		for (int i = 0; i < pointArray.length-1; i++){
+			sortedPointArray[i] = pointArray[sortedPointNums[i]];
+		}		
+		System.out.println("\n\nSorted Points:");
+		for (int i = 0; i < sortedPointArray.length; i++){
+			System.out.println("Point: \t" + sortedPointArray[i].pointNumber);
 		}
 	}
+	
+	public void convexHull(){
 
-	public Stack convexHull(){
-		Stack thisStack = new Stack();
-		return thisStack;
+		LinkedList<Point> x1 = new LinkedList<Point>();
+		Point currentPoint, pastPoint, pointToVisit;
+		Point[] grahamArray = new Point[sortedPointArray.length];
+		
+		int arrayCounter = 2;
+		currentPoint=sortedPointArray[arrayCounter-1];
+		pastPoint=sortedPointArray[arrayCounter-2];
+		pointToVisit=sortedPointArray[arrayCounter];
+		
+		System.out.println("\n\nAnalysis:\n");
+			while (pointToVisit!=sortedPointArray[sortedPointArray.length-1]){
+				if (currentPoint.compareTo(pastPoint, pointToVisit)>=0){
+					System.out.println("Before"+"\nPast point:"+pastPoint.pointNumber+"("+pastPoint.xPos+","+pastPoint.yPos+")"+
+										"\tCurrent:"+currentPoint.pointNumber+"("+currentPoint.xPos+","+currentPoint.yPos+")"+
+											"\tPTV:"+pointToVisit.pointNumber+"("+pointToVisit.xPos+","+pointToVisit.yPos+")");
+					arrayCounter++;
+					pastPoint=currentPoint;
+					currentPoint=pointToVisit;
+					pointToVisit=sortedPointArray[arrayCounter];
+					System.out.println("After"+"\nPast point:"+pastPoint.pointNumber+"("+pastPoint.xPos+","+pastPoint.yPos+")"+
+							"\tCurrent:"+currentPoint.pointNumber+"("+currentPoint.xPos+","+currentPoint.yPos+")"+
+								"\tPTV:"+pointToVisit.pointNumber+"("+pointToVisit.xPos+","+pointToVisit.yPos+")");
+					
+				}else{
+					//System.out.println("Current array index:" + arrayCounter);
+				//	System.out.println("Invalid direction found, breaking loop...");
+				//	break;
+					System.out.println("Found invalid turn! Correcting...");
+					currentPoint=pointToVisit;
+					arrayCounter++;
+					pointToVisit=sortedPointArray[arrayCounter];
+					System.out.println("Past point:"+pastPoint.pointNumber+"("+pastPoint.xPos+","+pastPoint.yPos+")"+
+							"\tCurrent:"+currentPoint.pointNumber+"("+currentPoint.xPos+","+currentPoint.yPos+")"+
+								"\tPTV:"+pointToVisit.pointNumber+"("+pointToVisit.xPos+","+pointToVisit.yPos+")");
+					System.out.println("\n\n");
+				}
+			}
+			
+		}
+		
+		//while we have more points to go to that aren't the origin
+		//if the next point is ccw
+		//set that point equal to the current point
+		//add that point to a "finalized" list
+		//if the following point is not ccw, remove the just added point from the 
+		//"Finalized" list and add the point that was not ccw
+		//to make it do it over and over, we can use a while the next point is not ccw
+		//or something like that
+		
 	}
-}
-;
+

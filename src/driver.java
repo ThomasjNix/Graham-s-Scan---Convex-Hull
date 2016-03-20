@@ -43,6 +43,7 @@ public class driver {
 		}
 		
 		findStuffOut.sortPoints();
+		findStuffOut.convexHull();
 		
 	}
 }
